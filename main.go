@@ -18,9 +18,18 @@ func main() {
 	if goRootDir == "" {
 		fmt.Println("GO_ROOT_PARENT_DIR env var empty.")
 		return
+	} else if sts, err := os.Stat(goRootDir); err != nil {
+		fmt.Println("access directory:", err)
+		return
+	} else if !sts.IsDir() {
+		fmt.Println(goRootDir, "is not a directory.")
+		return
 	}
 	if len(os.Args) < 2 {
-		fmt.Println("target go version not privided.")
+		fmt.Println("Golang version switcher.")
+		fmt.Println("Usage:")
+		fmt.Printf("\t%s [version]\n", os.Args[0])
+		listInstalled()
 		return
 	}
 
@@ -67,4 +76,23 @@ func main() {
 		fmt.Println("rename", targetRoot, "to", goRoot, "fail:", err)
 		return
 	}
+}
+
+func listInstalled() {
+	items, err := os.ReadDir(goRootDir)
+	if err != nil {
+		fmt.Println("read dir error:", err)
+		return
+	}
+	fmt.Println("Go versions found: ")
+	for _, item := range items {
+		if !item.IsDir() || !strings.HasPrefix(item.Name(), "go") {
+			continue
+		}
+		if item.Name() == "go" {
+			continue
+		}
+		fmt.Println("\t", item.Name())
+	}
+	fmt.Println("Enjoy it!")
 }
