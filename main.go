@@ -5,24 +5,25 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"regexp"
 	"strings"
 )
 
-var goRootDir string
+var goInstallDir string
 
 func init() {
-	goRootDir = os.Getenv("GO_ROOT_PARENT_DIR")
+	goInstallDir = os.Getenv("GO_ROOT_PARENT_DIR")
 }
 
 func main() {
-	if goRootDir == "" {
+	if goInstallDir == "" {
 		fmt.Println("GO_ROOT_PARENT_DIR env var empty.")
 		return
-	} else if sts, err := os.Stat(goRootDir); err != nil {
+	} else if sts, err := os.Stat(goInstallDir); err != nil {
 		fmt.Println("access directory:", err)
 		return
 	} else if !sts.IsDir() {
-		fmt.Println(goRootDir, "is not a directory.")
+		fmt.Println(goInstallDir, "is not a directory.")
 		return
 	}
 	if len(os.Args) < 2 {
@@ -33,7 +34,7 @@ func main() {
 		return
 	}
 
-	goRoot := path.Join(goRootDir, "go")
+	goRoot := path.Join(goInstallDir, "go")
 	if sts, err := os.Stat(goRoot); err != nil {
 		fmt.Println("find old go root err:", err)
 		return
@@ -56,10 +57,10 @@ func main() {
 		oldVer = ss[2]
 	}
 	fmt.Println("old version is:", oldVer)
-	renameOldTo := path.Join(goRootDir, oldVer)
+	renameOldTo := path.Join(goInstallDir, oldVer)
 
 	targetVer := os.Args[1]
-	targetRoot := path.Join(goRootDir, fmt.Sprintf("go%s", targetVer))
+	targetRoot := path.Join(goInstallDir, fmt.Sprintf("go%s", targetVer))
 	if sts, err := os.Stat(targetRoot); err != nil {
 		fmt.Println("find target go root err:", err)
 		return
@@ -79,14 +80,29 @@ func main() {
 }
 
 func listInstalled() {
-	items, err := os.ReadDir(goRootDir)
+	items, err := os.ReadDir(goInstallDir)
 	if err != nil {
 		fmt.Println("read dir error:", err)
 		return
 	}
+	if out, err := exec.Command("go", "version").Output(); err != nil {
+		fmt.Println("'go version' err:", err)
+	} else {
+		ss := strings.SplitN(string(out), " ", 4)
+		if len(ss) < 4 {
+			fmt.Println("parse version fail:", string(out))
+			return
+		}
+		fmt.Println("Current:", ss[2])
+	}
+	fmt.Println("Install directory:", goInstallDir)
 	fmt.Println("Go versions found: ")
+	goDirRegex := regexp.MustCompile(`go\d\.\d{1,2}(\.\d{1,2})?`)
 	for _, item := range items {
-		if !item.IsDir() || !strings.HasPrefix(item.Name(), "go") {
+		if !item.IsDir() {
+			continue
+		}
+		if !goDirRegex.Match([]byte(item.Name())) {
 			continue
 		}
 		if item.Name() == "go" {
