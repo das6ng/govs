@@ -4,7 +4,7 @@ This is a simple go version switcher.
 
 # Installation
 
-Just run: `go install github.com/dashengyeah/govs@latest`
+Just run: `go install github.com/das6ng/govs@latest`
 
 # Usage
 

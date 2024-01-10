@@ -1,4 +1,4 @@
-module github.com/dashengyeah/govs
+module github.com/das6ng/govs
 
 go 1.20
 
