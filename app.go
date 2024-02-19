@@ -15,6 +15,7 @@ var app = &cli.App{
 			Destination: &goRootDir,
 			Aliases:     []string{"p"},
 			EnvVars:     []string{"GO_ROOT_PARENT_DIR"},
+			Value:       currGoRoot(),
 		},
 	},
 	Action: runSwitcher,

@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -70,7 +72,7 @@ func switch2Ver(targetVer string) error {
 func listInstalled() {
 	fmt.Println("Golang version switcher.")
 	fmt.Println("Usage:")
-	fmt.Printf("    %s [version]\n", os.Args[0])
+	fmt.Printf("    %s [version]\n", filepath.Base(os.Args[0]))
 
 	items, err := os.ReadDir(goRootDir)
 	if err != nil {
@@ -108,6 +110,17 @@ func currVer() string {
 		return "unknown"
 	}
 	return ver
+}
+
+func currGoRoot() string {
+	out, err := exec.Command("go", "env", "GOROOT").Output()
+	if err != nil {
+		return ""
+	}
+	if runtime.GOOS == "windows" {
+		out = bytes.ReplaceAll(out, []byte{'\\'}, []byte{'/'})
+	}
+	return path.Dir(string(out))
 }
 
 func fetchVersion(root string) (string, bool) {

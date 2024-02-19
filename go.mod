@@ -1,6 +1,6 @@
 module github.com/das6ng/govs
 
-go 1.20
+go 1.21
 
 require github.com/urfave/cli/v2 v2.27.1
 
